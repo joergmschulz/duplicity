@@ -7,7 +7,7 @@ services:
      build:
        context: ./duplicity
        args:
-         duplicity_uid: 1000
+         duplicity_uid: 1001
      hostname: duplicity
      privileged: true
      # volumes:
