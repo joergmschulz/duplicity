@@ -1,0 +1,80 @@
+version: '3.7'
+
+services:
+   duplicity:
+     image: joergschulz/duplicity
+     restart: "no"
+     build:
+       context: ./duplicity
+       args:
+         duplicity_uid: 1000
+     hostname: duplicity
+     privileged: true
+     # volumes:
+       # - ./duplicity/root:/root/
+       ##### directory where we pull the backups from. A preparing script must move erverything here.
+       # these volumes should be overriden with docker-compose.override.yml
+       # - ${VAR_BACKUP_DIR}:/var/backup/backup:ro
+       # - ${DATA_DIR}:/var/backup/data:ro
+
+
+     environment:
+       # - BACKDIRS=/var/backup/backup /var/backup/data /var/backup/vmail/
+       - DUPOPTS=''
+       # cleanup (really needs --force)
+       - DUPOPTS_CLEANUP=remove-older-than 4W --force
+       # exclude patterns
+       - DUPOPTS="$DUPOPTS --exclude **/.ccache"
+       - BACKUP_PORT=${BACKUP_PORT}
+       - BACKUP_HOST=${BACKUP_HOST}
+       - BACKUP_RPATH=${BACKUP_RPATH}
+       - SOURCE_HOST=${SOURCE_HOST}
+
+     secrets:
+        - gnupg
+        - duplicity
+        - duplicity-ssh-key
+     extra_hosts:
+        - "c.elternserver.local:10.100.101.13"
+        - "cloud.elternserver.local:10.100.101.12"
+        # - "mail.elternserver.local:10.100.101.11"
+        - "m.datilo.de:172.26.0.1"
+        - "murg.elternserver.local:10.100.101.16"
+        - "murg.elternserver.local:172.26.0.1"
+        - "db.sohoserver.local:10.100.101.14"
+        - "c.sohoserver.local:10.100.101.15"
+        - "murg.elternserver.de:172.26.0.1"
+     networks:
+       services:
+         ipv4_address: ${DUPLICITY_IP}
+         aliases:
+           - duplicity
+
+
+
+
+
+
+secrets:
+        letsencrypt-cert:
+           file: /etc/letsencrypt-readers/cert.pem
+        letsencrypt-fullchain:
+           file: /etc/letsencrypt-readers/fullchain.pem
+        letsencrypt-privkey:
+           file: /etc/letsencrypt-readers/privkey.pem
+        aliases:
+           file: etc/aliases
+        gnupg:
+           file: .gnupg
+        duplicity:
+           file: .duplicity.conf
+        duplicity-ssh-key:
+          file: .duplicity-ssh-key
+        passphrase:
+          file: .passphrase
+
+networks:
+  # traefik:
+  #   external: true
+  services:
+    external: true

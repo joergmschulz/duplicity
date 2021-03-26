@@ -1,0 +1,7 @@
+.env
+.gnupg
+.duplicity.conf
+.signkey
+.passphrase
+.duplicity-ssh-key
+docker-compose.override.yml
